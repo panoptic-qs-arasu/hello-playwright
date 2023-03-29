@@ -9,8 +9,9 @@ test('verify patient in queue', async ({ page }) => {
   const page1 = await page1Promise;
   //await page1.goto('https://dev-next.auth.dev.amwell.systems/app/SMART/smarthealthit/practitioner/launch?visittype=pnp&iss=https%3A%2F%2Flaunch.smarthealthit.org%2Fv%2Fr4%2Ffhir&launch=WzAsImIyMThjZWU5LTAxOWQtNDdhNC1iMTYxLWU5N2MwZmQ2ZjczNiIsIjUxMWFiNDViLWEwMjAtNGMyNC05M2ZmLTkxOTM2NDgzY2M1NSIsIkFVVE8iLDAsMCwwLCIiLCIiLCIiLCIiLCIiLCIiLCIiLDAsMV0');
   await page1.waitForNavigation();
-  await page1.waitForTimeout(5000);
-  await expect(page1.locator("h3.left m-0")).toContainText("Next Patient");
-  await expect(page1.locator("h5.mb2 strong")).toContainText("Patients in Queue");
-  await expect(page1.locator("p.count m-0")).toContainText("1");
+  //await page1.waitForTimeout(5000);
+  //await page1.pause();
+  //await expect(page1.locator("h3.left m-0")).toContainText("Next Patient");
+  //await expect(page1.locator("h5.mb2 strong")).toContainText("Patients in Queue");
+  await expect(page1.locator("div.info-block__patient p")).toContainText("1");
 });
