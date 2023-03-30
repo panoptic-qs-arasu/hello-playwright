@@ -249,4 +249,17 @@ test('add patient to queue', async ({request}) => {
     expect(response.ok()).toBeTruthy();
     resObject = await response.json();
     console.log(resObject);
+
+    // Fetch No. Of Patients in Queue
+    console.log('Fetch no. of patients count');
+    const patientCountEndPoint = "https://api.dev.amwell.systems/request-advertising/api/request-stats?providerId=cb8ca590-90d0-4b1a-833c-88ba44f6ec98";
+    
+    response = await request.get(patientCountEndPoint, {
+        headers: {
+            authorization: `Bearer ${accessToken}`,
+        },
+    });
+    expect(response.ok()).toBeTruthy();
+    resObject = await response.json();
+    console.log(resObject);
 });
