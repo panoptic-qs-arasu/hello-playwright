@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe("Test add patient to queue", async () => {
+    let patientsInQueueBefore = 0;
+    let patientsInQueueAfter = 0;
 
   test.beforeAll(async ({ request }) => {
     const tokenEndPoint = 'https://dev-next.keycloak.dev.amwell.systems/auth/realms/services/protocol/openid-connect/token';
@@ -20,6 +22,20 @@ test.describe("Test add patient to queue", async () => {
     const accessToken = resObject.access_token;
     //const {access_token} = JSON.parse(await response.text());
     //console.log(access_token)
+
+    // Fetch No. Of Patients in Queue
+    console.log('Fetch no. of patients count');
+    const patientCountEndPoint = "https://api.dev.amwell.systems/request-advertising/api/request-stats?providerId=cb8ca590-90d0-4b1a-833c-88ba44f6ec98";
+    
+    response = await request.get(patientCountEndPoint, {
+        headers: {
+            authorization: `Bearer ${accessToken}`,
+        },
+    });
+    expect(response.ok()).toBeTruthy();
+    resObject = await response.json();
+    console.log(resObject);
+    patientsInQueueBefore = resObject.numberOfRequests;
 
     const baseEndPoint = `https://api.dev.amwell.systems/fhir-proxy/v2/cdr`;
 
@@ -252,6 +268,19 @@ test.describe("Test add patient to queue", async () => {
     resObject = await response.json();
     console.log(resObject);
 
+     // Fetch No. Of Patients in Queue
+     console.log('Fetch no. of patients count');
+     response = await request.get(patientCountEndPoint, {
+         headers: {
+             authorization: `Bearer ${accessToken}`,
+         },
+     });
+     expect(response.ok()).toBeTruthy();
+     resObject = await response.json();
+     console.log(resObject);
+     patientsInQueueAfter = resObject.numberOfRequests;
+     expect(patientsInQueueBefore + 1).toBe(patientsInQueueAfter);
+
   });
 
   test('verify patient in queue', async ({page}) => {
@@ -263,7 +292,6 @@ test.describe("Test add patient to queue", async () => {
 
     await page1.waitForNavigation();
     //await page1.pause();
-    await expect(page1.locator("div.info-block__patient p")).toContainText("1");
+    await expect(page1.locator("div.info-block__patient p")).toContainText('' + patientsInQueueAfter);
   });
-
 });
