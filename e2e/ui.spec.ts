@@ -1,16 +1,18 @@
-import {expect, test} from '@playwright/test';
+import { test, expect } from '@playwright/test';
 
-test('add patient to queue', async ({request}) => {
+test.describe("Test add patient to queue", async () => {
+
+  test.beforeAll(async ({ request }) => {
     const tokenEndPoint = 'https://dev-next.keycloak.dev.amwell.systems/auth/realms/services/protocol/openid-connect/token';
 
     // create token
     console.log('create token');
     let response = await request.post(tokenEndPoint, {
-        form: {
-            grant_type: "client_credentials",
-            client_id: "test-automation-client",
-            client_secret: "JI5mwxzYvSkxkSv0Ub7PdyWupqlxSN4n",
-        },
+      form: {
+        grant_type: "client_credentials",
+        client_id: "test-automation-client",
+        client_secret: "JI5mwxzYvSkxkSv0Ub7PdyWupqlxSN4n",
+      },
     });
     expect(response.ok()).toBeTruthy();
     let resObject = await response.json();
@@ -47,10 +49,10 @@ test('add patient to queue', async ({request}) => {
     `;
     let reqPayLoad = JSON.parse(reqText);
     response = await request.post(`${baseEndPoint}/Encounter`, {
-        headers: {
-            authorization: `Bearer ${accessToken}`,
-        },
-        data: reqPayLoad,
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+      data: reqPayLoad,
     });
     expect(response.ok()).toBeTruthy();
     resObject = await response.json();
@@ -188,10 +190,10 @@ test('add patient to queue', async ({request}) => {
     reqPayLoad = JSON.parse(reqText);
     reqPayLoad.id = resObject.id;
     response = await request.put(`${baseEndPoint}/Encounter/${encounterId}`, {
-        headers: {
-            authorization: `Bearer ${accessToken}`,
-        },
-        data: reqPayLoad,
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+      data: reqPayLoad,
     });
     expect(response.ok()).toBeTruthy();
     resObject = await response.json();
@@ -220,10 +222,10 @@ test('add patient to queue', async ({request}) => {
     reqPayLoad = JSON.parse(reqText);
     reqPayLoad.encounter.reference = `Encounter/${encounterId}`;
     response = await request.post(`${baseEndPoint}/ServiceRequest`, {
-        headers: {
-            authorization: `Bearer ${accessToken}`,
-        },
-        data: reqPayLoad,
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+      data: reqPayLoad,
     });
     expect(response.ok()).toBeTruthy();
     resObject = await response.json();
@@ -241,12 +243,27 @@ test('add patient to queue', async ({request}) => {
     reqPayLoad = JSON.parse(reqText);
     reqPayLoad.encounterId = encounterId;
     response = await request.put(visitRequestEndPoint, {
-        headers: {
-            authorization: `Bearer ${accessToken}`,
-        },
-        data: reqPayLoad,
+      headers: {
+        authorization: `Bearer ${accessToken}`,
+      },
+      data: reqPayLoad,
     });
     expect(response.ok()).toBeTruthy();
     resObject = await response.json();
     console.log(resObject);
+
+  });
+
+  test('verify patient in queue', async ({page}) => {
+    await page.goto('https://launch.smarthealthit.org/?launch_url=https%3A%2F%2Fdev-next.auth.dev.amwell.systems%2Fapp%2FSMART%2Fsmarthealthit%2Fpractitioner%2Flaunch%3Fvisittype%3Dpnp&launch=WzAsImIyMThjZWU5LTAxOWQtNDdhNC1iMTYxLWU5N2MwZmQ2ZjczNiIsIjUxMWFiNDViLWEwMjAtNGMyNC05M2ZmLTkxOTM2NDgzY2M1NSIsIkFVVE8iLDAsMCwwLCIiLCIiLCIiLCIiLCIiLCIiLCIiLDAsMV0');
+
+    const page1Promise = page.waitForEvent('popup');
+    await page.getByRole('link', {name: 'Launch', exact: true}).click();
+    const page1 = await page1Promise;
+
+    await page1.waitForNavigation();
+    //await page1.pause();
+    await expect(page1.locator("div.info-block__patient p")).toContainText("1");
+  });
+
 });
